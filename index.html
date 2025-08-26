@@ -70,6 +70,7 @@
         }
 
         .param-row {
+            color: white;
             display: grid;
             grid-template-columns: 1fr 200px;
             gap: 15px;
@@ -423,7 +424,7 @@
         .result-value {
             font-size: 20px;
             font-weight: bold;
-            color: #f1c40f;
+            color: #0ff1d9;
             text-align: right;
         }
 
@@ -491,11 +492,11 @@
         <div class="input-section">
             <div class="param-container">
                 <div class="param-row">
-                    <label for="bandBreakEven">Band Break Even Point ($)</label>
+                    <label for="bandBreakEven">Band Cost ($)</label>
                     <input type="number" id="bandBreakEven" value="1200" step="0.01" min="0">
                 </div>
                 <div class="param-row">
-                    <label for="hostBreakEven">Host Break Even Point ($)</label>
+                    <label for="hostBreakEven">Host Cost ($)</label>
                     <input type="number" id="hostBreakEven" value="500" step="0.01" min="0">
                 </div>
                 <div class="param-row">
@@ -513,21 +514,21 @@
             <div class="slider-container">
                 <div class="slider-group">
                     <div class="percentage-labels">
-                        <label for="step1Host">Step 1 Host Percentage: <span id="step1HostValue">80</span>%</label>
+                        <label for="step1Host">Step 1: Host Percentage: <span id="step1HostValue">80</span>%</label>
                         <label class="band-label">Band Percentage: <span id="step1BandValue">20</span>%</label>
                     </div>
                     <input type="range" id="step1Host" value="80" min="0" max="100" class="slider">
                 </div>
                 <div class="slider-group">
                     <div class="percentage-labels">
-                        <label for="step2Host">Step 2 Host Percentage: <span id="step2HostValue">20</span>%</label>
+                        <label for="step2Host">Step 2: Host Percentage: <span id="step2HostValue">20</span>%</label>
                         <label class="band-label">Band Percentage: <span id="step2BandValue">80</span>%</label>
                     </div>
                     <input type="range" id="step2Host" value="20" min="0" max="100" class="slider">
                 </div>
                 <div class="slider-group">
                     <div class="percentage-labels">
-                        <label for="step3Host">Step 3 Host Percentage: <span id="step3HostValue">60</span>%</label>
+                        <label for="step3Host">Step 3: Host Percentage: <span id="step3HostValue">60</span>%</label>
                         <label class="band-label">Band Percentage: <span id="step3BandValue">40</span>%</label>
                     </div>
                     <input type="range" id="step3Host" value="60" min="0" max="100" class="slider">
@@ -543,7 +544,7 @@
         </div>
 
         <div class="final-results">
-            <h2>Final Results</h2>
+            <h2>Calculation</h2>
             <div class="results-container">
                 <div class="param-row">
                     <label for="attendees">Number of Attendees: <span id="attendeesValue">60</span></label>
