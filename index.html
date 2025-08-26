@@ -308,6 +308,35 @@
             background-color: #2980b9;
         }
         
+        .header-controls {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+        
+        .copy-current-btn {
+            background-color: #27ae60;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: background-color 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .copy-current-btn:hover {
+            background-color: #219a52;
+        }
+        
+        .copy-current-btn:active {
+            background-color: #1e8449;
+        }
+        
         .help-bubble {
             position: fixed;
             top: 50%;
@@ -470,8 +499,13 @@
     <div class="container">
         <div class="header">
             <h1>Revenue Split Calculator</h1>
-            <div class="help-icon" id="helpIcon" title="Help">
-                <span class="help-text">?</span>
+            <div class="header-controls">
+                <button class="copy-current-btn" id="copyCurrent" title="Copy URL with current values">
+                    <span>📋</span> Copy Current
+                </button>
+                <div class="help-icon" id="helpIcon" title="Help">
+                    <span class="help-text">?</span>
+                </div>
             </div>
         </div>
         
@@ -528,6 +562,23 @@
                 <p>Entering the number of attendees also calculates the revenue split for that number.</p>
 
                 <p>Finally, to compare with the traditional model, enter the band guarantee amount in the Traditional Fixed Fee Calculation panel and observe host profit or loss while varying the number of attendees.</p>
+                
+                <h3>URL Parameters and Sharing</h3>
+                
+                <p>You can share specific scenarios by using URL parameters. The following parameters are supported:</p>
+                <ul>
+                    <li><strong>bandCost</strong> - Band Cost ($)</li>
+                    <li><strong>hostCost</strong> - Host Cost ($)</li>
+                    <li><strong>gaPrice</strong> - General Admission Price ($)</li>
+                    <li><strong>additionalRev</strong> - Additional Revenue ($)</li>
+                    <li><strong>attendees</strong> - Number of Attendees</li>
+                    <li><strong>bandGuarantee</strong> - Band Guarantee ($)</li>
+                    <li><strong>step1Host</strong> - Step 1 Host Percentage (0-100)</li>
+                    <li><strong>step2Host</strong> - Step 2 Host Percentage (0-100)</li>
+                    <li><strong>step3Host</strong> - Step 3 Host Percentage (0-100)</li>
+                </ul>
+                <p>Use the "Copy Current" button to generate a URL with the current input values that you can share with others.</p>
+                <p>Example: <code>?bandCost=1500&hostCost=600&gaPrice=30&attendees=80&step1Host=75&step2Host=25&step3Host=55</code></p>
             </div>
         </div>
 
@@ -649,11 +700,143 @@
             bandGuarantee: document.getElementById('bandGuarantee')
         };
         
+        // URL parameter mapping
+        const urlParamMap = {
+            'bandCost': 'bandBreakEven',
+            'hostCost': 'hostBreakEven',
+            'gaPrice': 'generalAdmission',
+            'additionalRev': 'additionalRevenue',
+            'attendees': 'attendees',
+            'step1Host': 'step1Host',
+            'step2Host': 'step2Host',
+            'step3Host': 'step3Host',
+            'bandGuarantee': 'bandGuarantee'
+        };
+        
+        // Parse URL parameters and override input values
+        function parseUrlParameters() {
+            const urlParams = new URLSearchParams(window.location.search);
+            let hasParams = false;
+            
+            for (const [urlParam, inputKey] of Object.entries(urlParamMap)) {
+                const value = urlParams.get(urlParam);
+                if (value !== null && inputs[inputKey]) {
+                    const numValue = parseFloat(value);
+                    if (!isNaN(numValue)) {
+                        inputs[inputKey].value = numValue;
+                        hasParams = true;
+                        
+                        // Update slider displays if needed
+                        if (inputKey === 'step1Host') {
+                            document.getElementById('step1HostValue').textContent = numValue;
+                            document.getElementById('step1BandValue').textContent = 100 - numValue;
+                        } else if (inputKey === 'step2Host') {
+                            document.getElementById('step2HostValue').textContent = numValue;
+                            document.getElementById('step2BandValue').textContent = 100 - numValue;
+                        } else if (inputKey === 'step3Host') {
+                            document.getElementById('step3HostValue').textContent = numValue;
+                            document.getElementById('step3BandValue').textContent = 100 - numValue;
+                        } else if (inputKey === 'attendees') {
+                            document.getElementById('attendeesValue').textContent = numValue;
+                        }
+                    }
+                }
+            }
+            
+            return hasParams;
+        }
+        
+        // Generate URL with current parameter values
+        function generateUrlWithCurrentValues() {
+            const url = new URL(window.location.href);
+            url.search = ''; // Clear existing parameters
+            
+            const params = new URLSearchParams();
+            
+            // Add all current input values as parameters
+            for (const [urlParam, inputKey] of Object.entries(urlParamMap)) {
+                const input = inputs[inputKey];
+                if (input && input.value) {
+                    params.set(urlParam, input.value);
+                }
+            }
+            
+            url.search = params.toString();
+            return url.toString();
+        }
+        
+        // Copy current URL to clipboard
+        async function copyCurrent() {
+            const currentUrl = generateUrlWithCurrentValues();
+            
+            try {
+                // Check if clipboard API is available and we have permission
+                if (navigator.clipboard && window.isSecureContext) {
+                    await navigator.clipboard.writeText(currentUrl);
+                    
+                    // Show success feedback
+                    showCopyFeedback('✅ Copied!', '#27ae60');
+                } else {
+                    // Clipboard API not available, use fallback
+                    showUrlPrompt(currentUrl);
+                }
+            } catch (err) {
+                console.log('Clipboard write failed, using fallback:', err.message);
+                // Fallback: show the URL in a prompt or select text
+                showUrlPrompt(currentUrl);
+            }
+        }
+        
+        // Show copy feedback
+        function showCopyFeedback(message, color) {
+            const btn = document.getElementById('copyCurrent');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = message;
+            btn.style.backgroundColor = color;
+            
+            setTimeout(() => {
+                btn.innerHTML = originalText;
+                btn.style.backgroundColor = '';
+            }, 2000);
+        }
+        
+        // Show URL in a prompt for manual copying
+        function showUrlPrompt(url) {
+            // Create a temporary textarea for copying
+            const textarea = document.createElement('textarea');
+            textarea.value = url;
+            textarea.style.position = 'fixed';
+            textarea.style.left = '-999999px';
+            textarea.style.top = '-999999px';
+            document.body.appendChild(textarea);
+            textarea.focus();
+            textarea.select();
+            
+            try {
+                // Try to copy using the older execCommand
+                const successful = document.execCommand('copy');
+                if (successful) {
+                    showCopyFeedback('✅ Copied!', '#27ae60');
+                } else {
+                    // If that fails too, show prompt
+                    prompt('Copy this URL:', url);
+                }
+            } catch (err) {
+                // Final fallback: show prompt
+                prompt('Copy this URL:', url);
+            } finally {
+                document.body.removeChild(textarea);
+            }
+        }
+        
         // Help system elements
         const helpIcon = document.getElementById('helpIcon');
         const helpBubble = document.getElementById('helpBubble');
         const helpOverlay = document.getElementById('helpOverlay');
         const helpClose = document.getElementById('helpClose');
+        
+        // Copy current button
+        const copyCurr = document.getElementById('copyCurrent');
         
         // Help system event listeners
         helpIcon.addEventListener('click', function() {
@@ -678,6 +861,9 @@
                 helpOverlay.classList.remove('show');
             }
         });
+        
+        // Copy current button event listener
+        copyCurr.addEventListener('click', copyCurrent);
 
         // Add event listeners for real-time calculation and chart updates
         Object.values(inputs).forEach(input => {
@@ -1002,7 +1188,8 @@
             });
         }
 
-        // Calculate and create chart on page load
+        // Parse URL parameters first, then calculate and create chart on page load
+        parseUrlParameters();
         calculate();
         createRevenueChart();
     </script>
