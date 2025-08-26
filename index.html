@@ -606,7 +606,7 @@
                 const hostRevenueData = [];
                 const bandRevenueData = [];
                 
-                for (let attendees = 0; attendees <= 500; attendees += 5) {
+                for (let attendees = 0; attendees <= 200; attendees += 5) {
                     const result = calculateRevenueForAttendees(attendees);
                     hostRevenueData.push(result.totalToHost);
                     bandRevenueData.push(result.totalToBand);
@@ -639,12 +639,12 @@
         function createRevenueChart() {
             const ctx = document.getElementById('revenueChart').getContext('2d');
             
-            // Generate data points for 0 to 500 attendees in increments of 5
+            // Generate data points for 0 to 200 attendees in increments of 5 (for chart display)
             const attendeeRange = [];
             const hostRevenueData = [];
             const bandRevenueData = [];
             
-            for (let attendees = 0; attendees <= 500; attendees += 5) {
+            for (let attendees = 0; attendees <= 200; attendees += 5) {
                 attendeeRange.push(attendees);
                 
                 // Calculate revenue for this attendance level
