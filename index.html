@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Revenue Split Calculator</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         * {
             box-sizing: border-box;
@@ -120,6 +121,27 @@
             justify-content: space-between;
             margin: 5px 0;
             font-size: 14px;
+        }
+
+        .chart-section {
+            background: #ffffff;
+            border: 2px solid #e8e8e8;
+            border-radius: 8px;
+            padding: 25px;
+            margin-bottom: 30px;
+        }
+
+        .chart-section h2 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            border-left: 4px solid #27ae60;
+            padding-left: 15px;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 400px;
+            margin: 20px 0;
         }
 
         .final-results {
@@ -300,6 +322,13 @@
             </div>
         </div>
 
+        <div class="chart-section">
+            <h2>Revenue Analysis by Attendance</h2>
+            <div class="chart-container">
+                <canvas id="revenueChart"></canvas>
+            </div>
+        </div>
+
         <div class="final-results">
             <h2>Final Results</h2>
             <div class="results-grid">
@@ -330,9 +359,9 @@
             step3Host: document.getElementById('step3Host')
         };
 
-        // Add event listeners for real-time calculation
+        // Add event listeners for real-time calculation and chart updates
         Object.values(inputs).forEach(input => {
-            input.addEventListener('input', calculate);
+            input.addEventListener('input', calculateAndUpdateChart);
         });
 
         function calculate() {
@@ -417,8 +446,165 @@
             }).format(amount);
         }
 
-        // Calculate on page load
+        // Calculate revenue for a specific number of attendees
+        function calculateRevenueForAttendees(attendees) {
+            // Get current input values
+            const bandBreakEven = parseFloat(inputs.bandBreakEven.value) || 0;
+            const generalAdmission = parseFloat(inputs.generalAdmission.value) || 0;
+            const additionalRevenue = parseFloat(inputs.additionalRevenue.value) || 0;
+            const step1HostFraction = parseFloat(inputs.step1Host.value) || 0;
+            const step2HostFraction = parseFloat(inputs.step2Host.value) || 0;
+            const step3HostFraction = parseFloat(inputs.step3Host.value) || 0;
+
+            // Calculate derived fractions
+            const step1BandFraction = 1 - step1HostFraction;
+            const step2BandFraction = 1 - step2HostFraction;
+            const step3BandFraction = 1 - step3HostFraction;
+
+            // Basic calculations (matching Excel formulas)
+            const totalRevenue = generalAdmission * attendees + additionalRevenue;
+            
+            // Step 1 calculations
+            const step1Threshold = STEP1_THRESHOLD / step1HostFraction;
+            const step1Amount = Math.min(totalRevenue, step1Threshold);
+            const step1ToHost = step1Amount * step1HostFraction;
+            const step1ToBand = step1Amount * step1BandFraction;
+            
+            // Remaining after step 1
+            const remainingAfterStep1 = Math.max(0, totalRevenue - step1Amount);
+            
+            // Step 2 calculations
+            const step2Threshold = (bandBreakEven - step1ToBand) / step2BandFraction;
+            const step2Amount = Math.min(remainingAfterStep1, step2Threshold);
+            const step2ToHost = step2Amount * step2HostFraction;
+            const step2ToBand = step2Amount * step2BandFraction;
+            
+            // Remaining after step 2
+            const remainingAfterStep2 = Math.max(0, remainingAfterStep1 - step2Amount);
+            
+            // Step 3 calculations
+            const step3Amount = remainingAfterStep2;
+            const step3ToHost = step3Amount * step3HostFraction;
+            const step3ToBand = step3Amount * step3BandFraction;
+            
+            // Final totals
+            const totalToHost = step1ToHost + step2ToHost + step3ToHost;
+            const totalToBand = step1ToBand + step2ToBand + step3ToBand;
+
+            return {
+                totalToHost,
+                totalToBand
+            };
+        }
+
+        // Update the chart when parameters change
+        function updateChart() {
+            if (revenueChart) {
+                // Generate new data points
+                const hostRevenueData = [];
+                const bandRevenueData = [];
+                
+                for (let attendees = 0; attendees <= 250; attendees += 5) {
+                    const result = calculateRevenueForAttendees(attendees);
+                    hostRevenueData.push(result.totalToHost);
+                    bandRevenueData.push(result.totalToBand);
+                }
+                
+                // Update chart data
+                revenueChart.data.datasets[0].data = hostRevenueData;
+                revenueChart.data.datasets[1].data = bandRevenueData;
+                revenueChart.update();
+            }
+        }
+
+        // Modified calculate function to also update chart
+        function calculateAndUpdateChart() {
+            calculate();
+            updateChart();
+        }
+
+        // Chart variables
+        let revenueChart = null;
+
+        // Create the revenue sweep chart
+        function createRevenueChart() {
+            const ctx = document.getElementById('revenueChart').getContext('2d');
+            
+            // Generate data points for 0 to 250 attendees in increments of 5
+            const attendeeRange = [];
+            const hostRevenueData = [];
+            const bandRevenueData = [];
+            
+            for (let attendees = 0; attendees <= 250; attendees += 5) {
+                attendeeRange.push(attendees);
+                
+                // Calculate revenue for this attendance level
+                const result = calculateRevenueForAttendees(attendees);
+                hostRevenueData.push(result.totalToHost);
+                bandRevenueData.push(result.totalToBand);
+            }
+            
+            revenueChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: attendeeRange,
+                    datasets: [{
+                        label: 'Host Revenue',
+                        data: hostRevenueData,
+                        borderColor: '#3498db',
+                        backgroundColor: 'rgba(52, 152, 219, 0.1)',
+                        borderWidth: 2,
+                        tension: 0.1
+                    }, {
+                        label: 'Band Revenue',
+                        data: bandRevenueData,
+                        borderColor: '#e74c3c',
+                        backgroundColor: 'rgba(231, 76, 60, 0.1)',
+                        borderWidth: 2,
+                        tension: 0.1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Host vs Band Revenue by Number of Attendees'
+                        },
+                        legend: {
+                            display: true,
+                            position: 'top'
+                        }
+                    },
+                    scales: {
+                        x: {
+                            display: true,
+                            title: {
+                                display: true,
+                                text: 'Number of Attendees'
+                            }
+                        },
+                        y: {
+                            display: true,
+                            title: {
+                                display: true,
+                                text: 'Revenue ($)'
+                            },
+                            beginAtZero: true
+                        }
+                    },
+                    interaction: {
+                        intersect: false,
+                        mode: 'index'
+                    }
+                }
+            });
+        }
+
+        // Calculate and create chart on page load
         calculate();
+        createRevenueChart();
     </script>
 </body>
 </html>
