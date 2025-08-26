@@ -121,6 +121,18 @@
             color: #34495e;
             font-size: 16px;
         }
+        
+        .percentage-labels {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+        
+        .band-label {
+            color: #e74c3c;
+            font-size: 14px;
+        }
 
         .slider {
             width: 100%;
@@ -500,15 +512,24 @@
         <div class="input-section">
             <div class="slider-container">
                 <div class="slider-group">
-                    <label for="step1Host">Step 1 Host Percentage: <span id="step1HostValue">80</span>%</label>
+                    <div class="percentage-labels">
+                        <label for="step1Host">Step 1 Host Percentage: <span id="step1HostValue">80</span>%</label>
+                        <label class="band-label">Band Percentage: <span id="step1BandValue">20</span>%</label>
+                    </div>
                     <input type="range" id="step1Host" value="80" min="0" max="100" class="slider">
                 </div>
                 <div class="slider-group">
-                    <label for="step2Host">Step 2 Host Percentage: <span id="step2HostValue">20</span>%</label>
+                    <div class="percentage-labels">
+                        <label for="step2Host">Step 2 Host Percentage: <span id="step2HostValue">20</span>%</label>
+                        <label class="band-label">Band Percentage: <span id="step2BandValue">80</span>%</label>
+                    </div>
                     <input type="range" id="step2Host" value="20" min="0" max="100" class="slider">
                 </div>
                 <div class="slider-group">
-                    <label for="step3Host">Step 3 Host Percentage: <span id="step3HostValue">60</span>%</label>
+                    <div class="percentage-labels">
+                        <label for="step3Host">Step 3 Host Percentage: <span id="step3HostValue">60</span>%</label>
+                        <label class="band-label">Band Percentage: <span id="step3BandValue">40</span>%</label>
+                    </div>
                     <input type="range" id="step3Host" value="60" min="0" max="100" class="slider">
                 </div>
             </div>
@@ -623,14 +644,17 @@
         // Add event listeners for slider value display updates
         inputs.step1Host.addEventListener('input', function() {
             document.getElementById('step1HostValue').textContent = this.value;
+            document.getElementById('step1BandValue').textContent = 100 - this.value;
         });
         
         inputs.step2Host.addEventListener('input', function() {
             document.getElementById('step2HostValue').textContent = this.value;
+            document.getElementById('step2BandValue').textContent = 100 - this.value;
         });
         
         inputs.step3Host.addEventListener('input', function() {
             document.getElementById('step3HostValue').textContent = this.value;
+            document.getElementById('step3BandValue').textContent = 100 - this.value;
         });
         
         inputs.attendees.addEventListener('input', function() {
