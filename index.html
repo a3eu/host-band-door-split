@@ -683,18 +683,35 @@
                 min-width: 120px;
             }
             
-            /* Attendees slider in results */
+            /* Attendees slider in results - keep original gradient background */
             .final-results .param-row {
                 background: rgba(255, 255, 255, 0.1);
                 border-radius: 8px;
                 padding: 15px;
                 margin-bottom: 20px;
+                /* Override the white card background for this special case */
+                box-shadow: none !important;
             }
             
             .final-results .param-row label {
                 color: white;
                 font-size: 16px;
                 margin-bottom: 10px;
+            }
+            
+            /* Traditional fee section - keep original gradient background */
+            .traditional-fee .param-row {
+                background: rgba(255, 255, 255, 0.1) !important;
+                box-shadow: none !important;
+            }
+            
+            .traditional-fee .param-row label {
+                color: white !important;
+            }
+            
+            .traditional-fee .param-row input {
+                background: rgba(255, 255, 255, 0.9) !important;
+                color: #333 !important;
             }
             
             /* Help system mobile improvements */
