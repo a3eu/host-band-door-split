@@ -375,8 +375,8 @@
             <h2>Final Results</h2>
             <div class="results-container">
                 <div class="param-row">
-                    <label for="attendees">Number of Attendees</label>
-                    <input type="number" id="attendees" value="60" min="0">
+                    <label for="attendees">Number of Attendees: <span id="attendeesValue">60</span></label>
+                    <input type="range" id="attendees" class="slider" value="60" min="0" max="500" step="5">
                 </div>
                 <div class="result-row">
                     <span class="result-label">Total Revenue</span>
@@ -434,6 +434,10 @@
         
         inputs.step3Host.addEventListener('input', function() {
             document.getElementById('step3HostValue').textContent = this.value;
+        });
+        
+        inputs.attendees.addEventListener('input', function() {
+            document.getElementById('attendeesValue').textContent = this.value;
         });
 
         function calculate() {
@@ -602,7 +606,7 @@
                 const hostRevenueData = [];
                 const bandRevenueData = [];
                 
-                for (let attendees = 0; attendees <= 200; attendees += 5) {
+                for (let attendees = 0; attendees <= 500; attendees += 5) {
                     const result = calculateRevenueForAttendees(attendees);
                     hostRevenueData.push(result.totalToHost);
                     bandRevenueData.push(result.totalToBand);
@@ -611,6 +615,12 @@
                 // Update datasets
                 revenueChart.data.datasets[0].data = hostRevenueData;
                 revenueChart.data.datasets[1].data = bandRevenueData;
+                
+                // Update break-even lines
+                const hostBreakEven = parseFloat(inputs.hostBreakEven.value) || 500;
+                const bandBreakEven = parseFloat(inputs.bandBreakEven.value) || 1200;
+                revenueChart.data.datasets[2].data = Array(hostRevenueData.length).fill(hostBreakEven);
+                revenueChart.data.datasets[3].data = Array(bandRevenueData.length).fill(bandBreakEven);
                 
                 revenueChart.update();
             }
@@ -629,12 +639,12 @@
         function createRevenueChart() {
             const ctx = document.getElementById('revenueChart').getContext('2d');
             
-            // Generate data points for 0 to 200 attendees in increments of 5
+            // Generate data points for 0 to 500 attendees in increments of 5
             const attendeeRange = [];
             const hostRevenueData = [];
             const bandRevenueData = [];
             
-            for (let attendees = 0; attendees <= 200; attendees += 5) {
+            for (let attendees = 0; attendees <= 500; attendees += 5) {
                 attendeeRange.push(attendees);
                 
                 // Calculate revenue for this attendance level
@@ -661,6 +671,24 @@
                         backgroundColor: 'rgba(231, 76, 60, 0.1)',
                         borderWidth: 2,
                         tension: 0.1
+                    }, {
+                        label: 'Host Break-Even',
+                        data: Array(attendeeRange.length).fill(parseFloat(inputs.hostBreakEven.value) || 500),
+                        borderColor: '#3498db',
+                        backgroundColor: 'transparent',
+                        borderWidth: 1,
+                        borderDash: [5, 5],
+                        pointRadius: 0,
+                        fill: false
+                    }, {
+                        label: 'Band Break-Even',
+                        data: Array(attendeeRange.length).fill(parseFloat(inputs.bandBreakEven.value) || 1200),
+                        borderColor: '#e74c3c',
+                        backgroundColor: 'transparent',
+                        borderWidth: 1,
+                        borderDash: [5, 5],
+                        pointRadius: 0,
+                        fill: false
                     }]
                 },
                 options: {
