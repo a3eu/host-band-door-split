@@ -83,6 +83,72 @@
             box-shadow: 0 0 5px rgba(52, 152, 219, 0.3);
         }
 
+        .slider-container {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+
+        .slider-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .slider-group label {
+            font-weight: 600;
+            color: #34495e;
+            font-size: 16px;
+        }
+
+        .slider {
+            width: 100%;
+            height: 8px;
+            border-radius: 5px;
+            background: #ddd;
+            outline: none;
+            transition: background 0.3s;
+            cursor: pointer;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #3498db;
+            cursor: pointer;
+            border: 2px solid #2980b9;
+            transition: all 0.3s;
+        }
+
+        .slider::-webkit-slider-thumb:hover {
+            background: #2980b9;
+            transform: scale(1.1);
+        }
+
+        .slider::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #3498db;
+            cursor: pointer;
+            border: 2px solid #2980b9;
+            transition: all 0.3s;
+        }
+
+        .slider::-moz-range-thumb:hover {
+            background: #2980b9;
+            transform: scale(1.1);
+        }
+
+        .slider:focus {
+            box-shadow: 0 0 5px rgba(52, 152, 219, 0.5);
+        }
+
         .calculation-section {
             background: #ffffff;
             border: 2px solid #e8e8e8;
@@ -240,19 +306,19 @@
         </div>
 
         <div class="input-section">
-            <h2>Revenue Split Fractions</h2>
-            <div class="input-grid">
-                <div class="input-group">
-                    <label for="step1Host">Step 1 Host Fraction (0-1)</label>
-                    <input type="number" id="step1Host" value="0.8" step="0.01" min="0" max="1">
+            <h2>Revenue Split Percentages</h2>
+            <div class="slider-container">
+                <div class="slider-group">
+                    <label for="step1Host">Step 1 Host Percentage: <span id="step1HostValue">80</span>%</label>
+                    <input type="range" id="step1Host" value="80" min="0" max="100" class="slider">
                 </div>
-                <div class="input-group">
-                    <label for="step2Host">Step 2 Host Fraction (0-1)</label>
-                    <input type="number" id="step2Host" value="0.2" step="0.01" min="0" max="1">
+                <div class="slider-group">
+                    <label for="step2Host">Step 2 Host Percentage: <span id="step2HostValue">20</span>%</label>
+                    <input type="range" id="step2Host" value="20" min="0" max="100" class="slider">
                 </div>
-                <div class="input-group">
-                    <label for="step3Host">Step 3 Host Fraction (0-1)</label>
-                    <input type="number" id="step3Host" value="0.6" step="0.01" min="0" max="1">
+                <div class="slider-group">
+                    <label for="step3Host">Step 3 Host Percentage: <span id="step3HostValue">60</span>%</label>
+                    <input type="range" id="step3Host" value="60" min="0" max="100" class="slider">
                 </div>
             </div>
         </div>
@@ -364,6 +430,19 @@
         Object.values(inputs).forEach(input => {
             input.addEventListener('input', calculateAndUpdateChart);
         });
+        
+        // Add event listeners for slider value display updates
+        inputs.step1Host.addEventListener('input', function() {
+            document.getElementById('step1HostValue').textContent = this.value;
+        });
+        
+        inputs.step2Host.addEventListener('input', function() {
+            document.getElementById('step2HostValue').textContent = this.value;
+        });
+        
+        inputs.step3Host.addEventListener('input', function() {
+            document.getElementById('step3HostValue').textContent = this.value;
+        });
 
         function calculate() {
             // Get input values
@@ -371,9 +450,9 @@
             const generalAdmission = parseFloat(inputs.generalAdmission.value) || 0;
             const attendees = parseInt(inputs.attendees.value) || 0;
             const additionalRevenue = parseFloat(inputs.additionalRevenue.value) || 0;
-            const step1HostFraction = parseFloat(inputs.step1Host.value) || 0;
-            const step2HostFraction = parseFloat(inputs.step2Host.value) || 0;
-            const step3HostFraction = parseFloat(inputs.step3Host.value) || 0;
+            const step1HostFraction = (parseFloat(inputs.step1Host.value) || 0) / 100;
+            const step2HostFraction = (parseFloat(inputs.step2Host.value) || 0) / 100;
+            const step3HostFraction = (parseFloat(inputs.step3Host.value) || 0) / 100;
 
             // Calculate derived fractions
             const step1BandFraction = 1 - step1HostFraction;
@@ -485,9 +564,9 @@
             const bandBreakEven = parseFloat(inputs.bandBreakEven.value) || 0;
             const generalAdmission = parseFloat(inputs.generalAdmission.value) || 0;
             const additionalRevenue = parseFloat(inputs.additionalRevenue.value) || 0;
-            const step1HostFraction = parseFloat(inputs.step1Host.value) || 0;
-            const step2HostFraction = parseFloat(inputs.step2Host.value) || 0;
-            const step3HostFraction = parseFloat(inputs.step3Host.value) || 0;
+            const step1HostFraction = (parseFloat(inputs.step1Host.value) || 0) / 100;
+            const step2HostFraction = (parseFloat(inputs.step2Host.value) || 0) / 100;
+            const step3HostFraction = (parseFloat(inputs.step3Host.value) || 0) / 100;
 
             // Calculate derived fractions
             const step1BandFraction = 1 - step1HostFraction;
