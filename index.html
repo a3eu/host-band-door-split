@@ -655,11 +655,6 @@
 
         // Chart variables
         let revenueChart = null;
-        
-        // Register annotation plugin when available
-        if (window['chartjs-plugin-annotation']) {
-            Chart.register(window['chartjs-plugin-annotation']);
-        }
 
         // Create the revenue sweep chart
         function createRevenueChart() {
