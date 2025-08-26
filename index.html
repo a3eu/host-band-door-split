@@ -63,6 +63,27 @@
             flex-direction: column;
         }
 
+        .param-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .param-row {
+            display: grid;
+            grid-template-columns: 1fr 200px;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .param-row label {
+            margin-bottom: 0;
+        }
+
+        .param-row input {
+            width: 100%;
+        }
+
         label {
             font-weight: 600;
             margin-bottom: 8px;
@@ -211,6 +232,12 @@
             margin: 20px 0;
         }
 
+        .attendees-section {
+            margin-top: 25px;
+            padding-top: 20px;
+            border-top: 1px solid #e8e8e8;
+        }
+
         .final-results {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
@@ -285,20 +312,20 @@
         
         <div class="input-section">
             <h2>Event Parameters</h2>
-            <div class="input-grid">
-                <div class="input-group">
+            <div class="param-container">
+                <div class="param-row">
                     <label for="bandBreakEven">Band Break Even Point ($)</label>
                     <input type="number" id="bandBreakEven" value="1200" step="0.01" min="0">
                 </div>
-                <div class="input-group">
+                <div class="param-row">
+                    <label for="hostBreakEven">Host Break Even Point ($)</label>
+                    <input type="number" id="hostBreakEven" value="500" step="0.01" min="0">
+                </div>
+                <div class="param-row">
                     <label for="generalAdmission">General Admission Price ($)</label>
                     <input type="number" id="generalAdmission" value="25" step="0.01" min="0">
                 </div>
-                <div class="input-group">
-                    <label for="attendees">Number of Attendees</label>
-                    <input type="number" id="attendees" value="60" min="0">
-                </div>
-                <div class="input-group">
+                <div class="param-row">
                     <label for="additionalRevenue">Additional Revenue ($)</label>
                     <input type="number" id="additionalRevenue" value="0" step="0.01" min="0">
                 </div>
@@ -323,76 +350,16 @@
             </div>
         </div>
 
-        <div class="calculation-section">
-            <h2>Calculation Breakdown</h2>
-            
-            <div class="intermediate-calc">
-                <h3>Basic Calculations</h3>
-                <div class="calc-row">
-                    <span>Total Revenue (B14):</span>
-                    <span id="totalRevenue">$0.00</span>
-                </div>
-                <div class="calc-row">
-                    <span>Step 1 Threshold (B3):</span>
-                    <span>$500.00</span>
-                </div>
-            </div>
-
-            <div class="steps-container">
-                <div class="step">
-                    <h3>Step 1: Initial Split</h3>
-                    <div class="step-detail">
-                        <span>Amount to Split (E7):</span>
-                        <span id="step1Amount">$0.00</span>
-                    </div>
-                    <div class="step-detail">
-                        <span>To Host (E11):</span>
-                        <span id="step1HostAmount">$0.00</span>
-                    </div>
-                    <div class="step-detail">
-                        <span>To Band (E12):</span>
-                        <span id="step1BandAmount">$0.00</span>
-                    </div>
-                </div>
-
-                <div class="step">
-                    <h3>Step 2: Band Break-Even</h3>
-                    <div class="step-detail">
-                        <span>Amount to Split (H7):</span>
-                        <span id="step2Amount">$0.00</span>
-                    </div>
-                    <div class="step-detail">
-                        <span>To Host (H11):</span>
-                        <span id="step2HostAmount">$0.00</span>
-                    </div>
-                    <div class="step-detail">
-                        <span>To Band (H12):</span>
-                        <span id="step2BandAmount">$0.00</span>
-                    </div>
-                </div>
-
-                <div class="step">
-                    <h3>Step 3: Final Split</h3>
-                    <div class="step-detail">
-                        <span>Amount to Split (K7):</span>
-                        <span id="step3Amount">$0.00</span>
-                    </div>
-                    <div class="step-detail">
-                        <span>To Host (K11):</span>
-                        <span id="step3HostAmount">$0.00</span>
-                    </div>
-                    <div class="step-detail">
-                        <span>To Band (K12):</span>
-                        <span id="step3BandAmount">$0.00</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-
         <div class="chart-section">
             <h2>Revenue Analysis by Attendance</h2>
             <div class="chart-container">
                 <canvas id="revenueChart"></canvas>
+            </div>
+            <div class="attendees-section">
+                <div class="param-row">
+                    <label for="attendees">Number of Attendees</label>
+                    <input type="number" id="attendees" value="60" min="0">
+                </div>
             </div>
         </div>
 
@@ -418,6 +385,7 @@
         // Get all input elements
         const inputs = {
             bandBreakEven: document.getElementById('bandBreakEven'),
+            hostBreakEven: document.getElementById('hostBreakEven'),
             generalAdmission: document.getElementById('generalAdmission'),
             attendees: document.getElementById('attendees'),
             additionalRevenue: document.getElementById('additionalRevenue'),
@@ -489,33 +457,9 @@
             const totalToHost = step1ToHost + step2ToHost + step3ToHost; // N11 = E11+H11+K11
             const totalToBand = step1ToBand + step2ToBand + step3ToBand; // N12 = E12+H12+K12
 
-            // Update display
-            updateDisplay({
-                totalRevenue,
-                step1Amount, step1ToHost, step1ToBand,
-                step2Amount, step2ToHost, step2ToBand,
-                step3Amount, step3ToHost, step3ToBand,
-                totalToHost, totalToBand
-            });
-        }
-
-        function updateDisplay(values) {
-            document.getElementById('totalRevenue').textContent = formatCurrency(values.totalRevenue);
-            
-            document.getElementById('step1Amount').textContent = formatCurrency(values.step1Amount);
-            document.getElementById('step1HostAmount').textContent = formatCurrency(values.step1ToHost);
-            document.getElementById('step1BandAmount').textContent = formatCurrency(values.step1ToBand);
-            
-            document.getElementById('step2Amount').textContent = formatCurrency(values.step2Amount);
-            document.getElementById('step2HostAmount').textContent = formatCurrency(values.step2ToHost);
-            document.getElementById('step2BandAmount').textContent = formatCurrency(values.step2ToBand);
-            
-            document.getElementById('step3Amount').textContent = formatCurrency(values.step3Amount);
-            document.getElementById('step3HostAmount').textContent = formatCurrency(values.step3ToHost);
-            document.getElementById('step3BandAmount').textContent = formatCurrency(values.step3ToBand);
-            
-            document.getElementById('totalHost').textContent = formatCurrency(values.totalToHost);
-            document.getElementById('totalBand').textContent = formatCurrency(values.totalToBand);
+            // Update final results display only
+            document.getElementById('totalHost').textContent = formatCurrency(totalToHost);
+            document.getElementById('totalBand').textContent = formatCurrency(totalToBand);
         }
 
         function formatCurrency(amount) {
@@ -529,7 +473,7 @@
         // Find break-even points using B2 and B3 values from spreadsheet
         function findBreakEvenPoints(hostRevenueData, bandRevenueData) {
             const bandBreakEven = parseFloat(inputs.bandBreakEven.value) || 0; // B2
-            const hostBreakEven = 500; // B3 from spreadsheet
+            const hostBreakEven = parseFloat(inputs.hostBreakEven.value) || 500; // B3 from spreadsheet, now user-editable
             
             let hostBreakEvenIndex = null;
             let bandBreakEvenIndex = null;
