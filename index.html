@@ -439,6 +439,7 @@
         function calculate() {
             // Get input values
             const bandBreakEven = parseFloat(inputs.bandBreakEven.value) || 0;
+            const hostBreakEven = parseFloat(inputs.hostBreakEven.value) || 0;
             const generalAdmission = parseFloat(inputs.generalAdmission.value) || 0;
             const attendees = parseInt(inputs.attendees.value) || 0;
             const additionalRevenue = parseFloat(inputs.additionalRevenue.value) || 0;
@@ -481,10 +482,7 @@
             const totalToHost = step1ToHost + step2ToHost + step3ToHost; // N11 = E11+H11+K11
             const totalToBand = step1ToBand + step2ToBand + step3ToBand; // N12 = E12+H12+K12
 
-            // Calculate additional fields
-            const totalRevenue = generalAdmission * attendees + additionalRevenue;
-            const hostBreakEven = parseFloat(inputs.hostBreakEven.value) || 0;
-            const bandBreakEven = parseFloat(inputs.bandBreakEven.value) || 0;
+            // Calculate additional fields (totalRevenue, hostBreakEven, bandBreakEven already calculated above)
             const hostProfitLoss = totalToHost - hostBreakEven;
             const coSponsorshipAmount = Math.max(0, bandBreakEven - totalToBand);
             
@@ -601,47 +599,18 @@
         function updateChart() {
             if (revenueChart) {
                 // Generate new data points
-                const attendeeRange = [];
                 const hostRevenueData = [];
                 const bandRevenueData = [];
                 
                 for (let attendees = 0; attendees <= 200; attendees += 5) {
-                    attendeeRange.push(attendees);
                     const result = calculateRevenueForAttendees(attendees);
                     hostRevenueData.push(result.totalToHost);
                     bandRevenueData.push(result.totalToBand);
                 }
                 
-                // Find break-even points
-                const breakEvenPoints = findBreakEvenPoints(hostRevenueData, bandRevenueData);
-                
-                // Create break-even point datasets
-                const hostBreakEvenData = [];
-                const bandBreakEvenData = [];
-                
-                if (breakEvenPoints.hostIndex !== null) {
-                    hostBreakEvenData.push({
-                        x: attendeeRange[breakEvenPoints.hostIndex],
-                        y: hostRevenueData[breakEvenPoints.hostIndex]
-                    });
-                }
-                
-                if (breakEvenPoints.bandIndex !== null) {
-                    bandBreakEvenData.push({
-                        x: attendeeRange[breakEvenPoints.bandIndex],
-                        y: bandRevenueData[breakEvenPoints.bandIndex]
-                    });
-                }
-                
-                // Update all datasets
+                // Update datasets
                 revenueChart.data.datasets[0].data = hostRevenueData;
                 revenueChart.data.datasets[1].data = bandRevenueData;
-                revenueChart.data.datasets[2].data = hostBreakEvenData;
-                revenueChart.data.datasets[3].data = bandBreakEvenData;
-                
-                // Update labels to show current break-even values
-                revenueChart.data.datasets[2].label = `Host Break-Even ($${breakEvenPoints.hostValue})`;
-                revenueChart.data.datasets[3].label = `Band Break-Even ($${breakEvenPoints.bandValue})`;
                 
                 revenueChart.update();
             }
@@ -674,27 +643,6 @@
                 bandRevenueData.push(result.totalToBand);
             }
             
-            // Find break-even points
-            const breakEvenPoints = findBreakEvenPoints(hostRevenueData, bandRevenueData);
-            
-            // Create break-even point datasets
-            const hostBreakEvenData = [];
-            const bandBreakEvenData = [];
-            
-            if (breakEvenPoints.hostIndex !== null) {
-                hostBreakEvenData.push({
-                    x: attendeeRange[breakEvenPoints.hostIndex],
-                    y: hostRevenueData[breakEvenPoints.hostIndex]
-                });
-            }
-            
-            if (breakEvenPoints.bandIndex !== null) {
-                bandBreakEvenData.push({
-                    x: attendeeRange[breakEvenPoints.bandIndex],
-                    y: bandRevenueData[breakEvenPoints.bandIndex]
-                });
-            }
-            
             revenueChart = new Chart(ctx, {
                 type: 'line',
                 data: {
@@ -713,26 +661,6 @@
                         backgroundColor: 'rgba(231, 76, 60, 0.1)',
                         borderWidth: 2,
                         tension: 0.1
-                    }, {
-                        label: `Host Break-Even ($${breakEvenPoints.hostValue})`,
-                        data: hostBreakEvenData,
-                        borderColor: '#3498db',
-                        backgroundColor: '#3498db',
-                        pointRadius: 8,
-                        pointHoverRadius: 10,
-                        showLine: false,
-                        pointBorderWidth: 2,
-                        pointBorderColor: '#2980b9'
-                    }, {
-                        label: `Band Break-Even ($${breakEvenPoints.bandValue})`,
-                        data: bandBreakEvenData,
-                        borderColor: '#e74c3c',
-                        backgroundColor: '#e74c3c',
-                        pointRadius: 8,
-                        pointHoverRadius: 10,
-                        showLine: false,
-                        pointBorderWidth: 2,
-                        pointBorderColor: '#c0392b'
                     }]
                 },
                 options: {
