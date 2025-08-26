@@ -251,6 +251,21 @@
             border: none;
             padding: 0;
         }
+        
+        .traditional-fee {
+            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 8px;
+            text-align: center;
+            margin-top: 20px;
+        }
+        
+        .traditional-fee h2 {
+            margin-bottom: 20px;
+            border: none;
+            padding: 0;
+        }
 
         .results-container {
             display: flex;
@@ -400,6 +415,20 @@
                 </div>
             </div>
         </div>
+
+        <div class="traditional-fee">
+            <h2>Traditional Fixed Fee Calculation</h2>
+            <div class="results-container">
+                <div class="param-row">
+                    <label for="bandGuarantee">Band Guarantee ($)</label>
+                    <input type="number" id="bandGuarantee" value="800" min="0">
+                </div>
+                <div class="result-row">
+                    <span class="result-label">Host Profit/Loss</span>
+                    <span class="result-value" id="traditionalHostProfitLoss">$0.00</span>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -415,7 +444,8 @@
             additionalRevenue: document.getElementById('additionalRevenue'),
             step1Host: document.getElementById('step1Host'),
             step2Host: document.getElementById('step2Host'),
-            step3Host: document.getElementById('step3Host')
+            step3Host: document.getElementById('step3Host'),
+            bandGuarantee: document.getElementById('bandGuarantee')
         };
 
         // Add event listeners for real-time calculation and chart updates
@@ -506,6 +536,15 @@
             
             // Update co-sponsorship amount
             document.getElementById('coSponsorshipAmount').textContent = formatCurrency(coSponsorshipAmount);
+            
+            // Traditional Fixed Fee Calculation
+            const bandGuarantee = parseFloat(inputs.bandGuarantee.value) || 0;
+            const traditionalHostProfitLoss = totalRevenue - bandGuarantee;
+            
+            // Update traditional host profit/loss with conditional coloring
+            const traditionalHostProfitLossElement = document.getElementById('traditionalHostProfitLoss');
+            traditionalHostProfitLossElement.textContent = formatCurrency(traditionalHostProfitLoss);
+            traditionalHostProfitLossElement.className = 'result-value ' + (traditionalHostProfitLoss >= 0 ? 'profit' : 'loss');
         }
 
         function formatCurrency(amount) {
