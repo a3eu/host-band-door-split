@@ -478,17 +478,59 @@
         <div class="help-bubble" id="helpBubble">
             <div class="help-content">
                 <div class="help-close" id="helpClose">×</div>
+
+
+
+
+
+
                 <h3>Revenue Split Calculator Help</h3>
-                <p><em>Please provide the Google Doc content to populate this help section.</em></p>
+
                 <p>This calculator helps you compare two different payment models:</p>
                 <ul>
-                    <li><strong>3-Step Revenue Split:</strong> A complex revenue-sharing model with multiple tiers</li>
+                    <li><strong>3-Step Revenue Split:</strong> A novel revenue-sharing model with multiple tiers</li>
                     <li><strong>Traditional Fixed Fee:</strong> A simple guaranteed payment to the band</li>
                 </ul>
                 <p>Use the controls above to adjust parameters and see how different scenarios affect payouts for both host and band.</p>
+
+                <h3>Host/Band Split</h3>
+
+                <p>Both the host and the band should be compensated fairly.</p>
+
+                <p>Band cost consists of musician pay, sound cost, transportation, etc. In the current market situation, the band cost is heavily discounted (for example, the band often does not charge extra for acting as sound engineer, $200–500 value).</p>
+
+                <p>Host's costs include room rental, advertising costs, DJ fee, food, organizer's time, etc. The true cost can be hard to estimate.</p>
+
+                <p>Under the traditional model, the host assumes all the risk and is required to pay the band quoted guarantee. The hosts often lose money on live music events and hope to recoup some of it from the profits from other events.</p>
+
+                <p>Under this split formula, there is no band guarantee and the host is given priority of breaking even. The band shares risk and expects to have to co-sponsor the event at average attendance while the host is expected to not lose money. In exchange, the band has a chance to break even or make profit if attendance is better than expected.</p>
+
+                <p>The calculation is split into 3 steps:</p>
+
+                <p><strong>In Step 1</strong>, the host takes the majority of the revenue (as specified by the Step 1 split percentage) until its share of the revenue reaches Host's Cost.</p>
+
+                <p><strong>In Step 2</strong>, the band takes the majority of the revenue (as specified by the Step 2 split percentage) until the band's cost is met. During Step 2, the host has broken even already but the band has not. If there is no revenue remaining in Step 2, both host and the band lost money.</p>
+
+                <p><strong>In Step 3</strong>, if any revenue remains, the host and the band split that revenue according to Step 2 split percentage. Having Step 3 revenue means that both the host and the band broke even.</p>
+
+                <p>To calculate the split, enter the event parameters:</p>
+
+                <ol>
+                    <li><strong>Band Cost</strong> as quoted by the band agent. The band cost is often the "union" minimum pay per musician times the number of musicians. The band should expect to lose money at average attendance and make money if the attendance is twice the average.</li>
+                    <li><strong>Host Cost</strong> is a reasonable estimate of host's expenses for the event. Inflating the number will increase the band's risk beyond the point of where the band is able to assume it.</li>
+                    <li><strong>General Admission price</strong> is the cost of one ticket.</li>
+                    <li><strong>Additional revenue</strong> is the actual/estimated amount of extra revenue such as donations or VIP ticket sales.</li>
+                    <li><strong>Set step split percentages</strong> with corresponding sliders.</li>
+                </ol>
+
+                <p>Setting the input and the sliders plots band/host revenue against the number of attendees.</p>
+
+                <p>Entering the number of attendees also calculates the revenue split for that number.</p>
+
+                <p>Finally, to compare with the traditional model, enter the band guarantee amount in the Traditional Fixed Fee Calculation panel and observe host profit or loss while varying the number of attendees.</p>
             </div>
         </div>
-        
+
         <div class="input-section">
             <div class="param-container">
                 <div class="param-row">
