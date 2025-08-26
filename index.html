@@ -266,6 +266,122 @@
             border: none;
             padding: 0;
         }
+        
+        /* Help System Styles */
+        .header {
+            position: relative;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+        
+        .help-icon {
+            width: 32px;
+            height: 32px;
+            background-color: #3498db;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            font-weight: bold;
+            color: white;
+            font-size: 16px;
+        }
+        
+        .help-icon:hover {
+            background-color: #2980b9;
+        }
+        
+        .help-bubble {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            max-width: 600px;
+            max-height: 80vh;
+            width: 90vw;
+            z-index: 1000;
+            display: none;
+        }
+        
+        .help-bubble.show {
+            display: block;
+        }
+        
+        .help-content {
+            padding: 20px;
+            overflow-y: auto;
+            max-height: 70vh;
+            position: relative;
+        }
+        
+        .help-close {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 24px;
+            cursor: pointer;
+            color: #999;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+        
+        .help-close:hover {
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        
+        .help-content h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            margin-top: 0;
+            padding-right: 40px;
+        }
+        
+        .help-content p {
+            line-height: 1.6;
+            margin-bottom: 12px;
+            color: #333;
+        }
+        
+        .help-content ul {
+            margin: 12px 0;
+            padding-left: 20px;
+        }
+        
+        .help-content li {
+            line-height: 1.6;
+            margin-bottom: 8px;
+            color: #333;
+        }
+        
+        /* Overlay background */
+        .help-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+            display: none;
+        }
+        
+        .help-overlay.show {
+            display: block;
+        }
 
         .results-container {
             display: flex;
@@ -339,7 +455,26 @@
 </head>
 <body>
     <div class="container">
-        <h1>Revenue Split Calculator</h1>
+        <div class="header">
+            <h1>Revenue Split Calculator</h1>
+            <div class="help-icon" id="helpIcon" title="Help">
+                <span class="help-text">?</span>
+            </div>
+        </div>
+        
+        <div class="help-bubble" id="helpBubble">
+            <div class="help-content">
+                <div class="help-close" id="helpClose">×</div>
+                <h3>Revenue Split Calculator Help</h3>
+                <p><em>Please provide the Google Doc content to populate this help section.</em></p>
+                <p>This calculator helps you compare two different payment models:</p>
+                <ul>
+                    <li><strong>3-Step Revenue Split:</strong> A complex revenue-sharing model with multiple tiers</li>
+                    <li><strong>Traditional Fixed Fee:</strong> A simple guaranteed payment to the band</li>
+                </ul>
+                <p>Use the controls above to adjust parameters and see how different scenarios affect payouts for both host and band.</p>
+            </div>
+        </div>
         
         <div class="input-section">
             <div class="param-container">
@@ -430,6 +565,8 @@
             </div>
         </div>
     </div>
+    
+    <div class="help-overlay" id="helpOverlay"></div>
 
     <script>
         // Constants from the Excel sheet
@@ -447,6 +584,36 @@
             step3Host: document.getElementById('step3Host'),
             bandGuarantee: document.getElementById('bandGuarantee')
         };
+        
+        // Help system elements
+        const helpIcon = document.getElementById('helpIcon');
+        const helpBubble = document.getElementById('helpBubble');
+        const helpOverlay = document.getElementById('helpOverlay');
+        const helpClose = document.getElementById('helpClose');
+        
+        // Help system event listeners
+        helpIcon.addEventListener('click', function() {
+            helpBubble.classList.add('show');
+            helpOverlay.classList.add('show');
+        });
+        
+        helpClose.addEventListener('click', function() {
+            helpBubble.classList.remove('show');
+            helpOverlay.classList.remove('show');
+        });
+        
+        helpOverlay.addEventListener('click', function() {
+            helpBubble.classList.remove('show');
+            helpOverlay.classList.remove('show');
+        });
+        
+        // Close help bubble with Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && helpBubble.classList.contains('show')) {
+                helpBubble.classList.remove('show');
+                helpOverlay.classList.remove('show');
+            }
+        });
 
         // Add event listeners for real-time calculation and chart updates
         Object.values(inputs).forEach(input => {
