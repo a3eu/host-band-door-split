@@ -252,28 +252,44 @@
             padding: 0;
         }
 
-        .results-grid {
+        .results-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .result-row {
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
+            grid-template-columns: 1fr 200px;
+            gap: 15px;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
         }
 
-        .result-box {
-            background: rgba(255,255,255,0.1);
-            padding: 20px;
-            border-radius: 6px;
-            backdrop-filter: blur(10px);
+        .result-row:last-child {
+            border-bottom: none;
         }
 
-        .result-box h3 {
-            margin-bottom: 10px;
-            font-size: 18px;
+        .result-label {
+            font-weight: 600;
+            color: white;
+            font-size: 16px;
         }
 
-        .result-amount {
-            font-size: 28px;
+        .result-value {
+            font-size: 20px;
             font-weight: bold;
             color: #f1c40f;
+            text-align: right;
+        }
+
+        .result-value.profit {
+            color: #2ecc71;
+        }
+
+        .result-value.loss {
+            color: #e74c3c;
         }
 
         .intermediate-calc {
@@ -311,7 +327,6 @@
         <h1>Revenue Split Calculator</h1>
         
         <div class="input-section">
-            <h2>Event Parameters</h2>
             <div class="param-container">
                 <div class="param-row">
                     <label for="bandBreakEven">Band Break Even Point ($)</label>
@@ -333,7 +348,6 @@
         </div>
 
         <div class="input-section">
-            <h2>Revenue Split Percentages</h2>
             <div class="slider-container">
                 <div class="slider-group">
                     <label for="step1Host">Step 1 Host Percentage: <span id="step1HostValue">80</span>%</label>
@@ -351,28 +365,38 @@
         </div>
 
         <div class="chart-section">
-            <h2>Revenue Analysis by Attendance</h2>
             <div class="chart-container">
                 <canvas id="revenueChart"></canvas>
             </div>
-            <div class="attendees-section">
-                <div class="param-row">
-                    <label for="attendees">Number of Attendees</label>
-                    <input type="number" id="attendees" value="60" min="0">
-                </div>
-            </div>
+
         </div>
 
         <div class="final-results">
             <h2>Final Results</h2>
-            <div class="results-grid">
-                <div class="result-box">
-                    <h3>Total Due Host</h3>
-                    <div class="result-amount" id="totalHost">$0.00</div>
+            <div class="results-container">
+                <div class="param-row">
+                    <label for="attendees">Number of Attendees</label>
+                    <input type="number" id="attendees" value="60" min="0">
                 </div>
-                <div class="result-box">
-                    <h3>Total Due Band</h3>
-                    <div class="result-amount" id="totalBand">$0.00</div>
+                <div class="result-row">
+                    <span class="result-label">Total Revenue</span>
+                    <span class="result-value" id="totalRevenue">$0.00</span>
+                </div>
+                <div class="result-row">
+                    <span class="result-label">Total Due Host</span>
+                    <span class="result-value" id="totalHost">$0.00</span>
+                </div>
+                <div class="result-row">
+                    <span class="result-label">Total Due Band</span>
+                    <span class="result-value" id="totalBand">$0.00</span>
+                </div>
+                <div class="result-row">
+                    <span class="result-label">Host Profit/Loss</span>
+                    <span class="result-value" id="hostProfitLoss">$0.00</span>
+                </div>
+                <div class="result-row">
+                    <span class="result-label">Co-Sponsorship Amount</span>
+                    <span class="result-value" id="coSponsorshipAmount">$0.00</span>
                 </div>
             </div>
         </div>
@@ -457,9 +481,29 @@
             const totalToHost = step1ToHost + step2ToHost + step3ToHost; // N11 = E11+H11+K11
             const totalToBand = step1ToBand + step2ToBand + step3ToBand; // N12 = E12+H12+K12
 
-            // Update final results display only
+            // Calculate additional fields
+            const totalRevenue = generalAdmission * attendees + additionalRevenue;
+            const hostBreakEven = parseFloat(inputs.hostBreakEven.value) || 0;
+            const bandBreakEven = parseFloat(inputs.bandBreakEven.value) || 0;
+            const hostProfitLoss = totalToHost - hostBreakEven;
+            const coSponsorshipAmount = Math.max(0, bandBreakEven - totalToBand);
+            
+            // Update all result displays
+            document.getElementById('totalRevenue').textContent = formatCurrency(totalRevenue);
             document.getElementById('totalHost').textContent = formatCurrency(totalToHost);
-            document.getElementById('totalBand').textContent = formatCurrency(totalToBand);
+            
+            // Update total due band with conditional coloring
+            const totalBandElement = document.getElementById('totalBand');
+            totalBandElement.textContent = formatCurrency(totalToBand);
+            totalBandElement.className = 'result-value ' + (totalToBand >= bandBreakEven ? 'profit' : 'loss');
+            
+            // Update host profit/loss with conditional coloring
+            const hostProfitLossElement = document.getElementById('hostProfitLoss');
+            hostProfitLossElement.textContent = formatCurrency(hostProfitLoss);
+            hostProfitLossElement.className = 'result-value ' + (hostProfitLoss >= 0 ? 'profit' : 'loss');
+            
+            // Update co-sponsorship amount
+            document.getElementById('coSponsorshipAmount').textContent = formatCurrency(coSponsorshipAmount);
         }
 
         function formatCurrency(amount) {
@@ -561,7 +605,7 @@
                 const hostRevenueData = [];
                 const bandRevenueData = [];
                 
-                for (let attendees = 0; attendees <= 250; attendees += 5) {
+                for (let attendees = 0; attendees <= 200; attendees += 5) {
                     attendeeRange.push(attendees);
                     const result = calculateRevenueForAttendees(attendees);
                     hostRevenueData.push(result.totalToHost);
@@ -621,12 +665,12 @@
         function createRevenueChart() {
             const ctx = document.getElementById('revenueChart').getContext('2d');
             
-            // Generate data points for 0 to 250 attendees in increments of 5
+            // Generate data points for 0 to 200 attendees in increments of 5
             const attendeeRange = [];
             const hostRevenueData = [];
             const bandRevenueData = [];
             
-            for (let attendees = 0; attendees <= 250; attendees += 5) {
+            for (let attendees = 0; attendees <= 200; attendees += 5) {
                 attendeeRange.push(attendees);
                 
                 // Calculate revenue for this attendance level
