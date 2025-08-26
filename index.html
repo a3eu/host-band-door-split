@@ -543,9 +543,20 @@
                     bandRevenueData.push(result.totalToBand);
                 }
                 
-                // Update chart data
+                // Update main revenue data
                 revenueChart.data.datasets[0].data = hostRevenueData;
                 revenueChart.data.datasets[1].data = bandRevenueData;
+                
+                // Update break-even line datasets
+                const maxRevenue = Math.max(...hostRevenueData, ...bandRevenueData);
+                
+                // Host break-even line
+                revenueChart.data.datasets[2].data = breakEvenPoints.hostBreakEven !== null ? 
+                    [{x: breakEvenPoints.hostBreakEven, y: 0}, {x: breakEvenPoints.hostBreakEven, y: maxRevenue}] : [];
+                
+                // Band break-even line  
+                revenueChart.data.datasets[3].data = (breakEvenPoints.bandBreakEven !== null && breakEvenPoints.bandBreakEven <= 250) ? 
+                    [{x: breakEvenPoints.bandBreakEven, y: 0}, {x: breakEvenPoints.bandBreakEven, y: maxRevenue}] : [];
                 
                 // Update break-even annotations
                 const breakEvenPoints = calculateBreakEvenPoints();
@@ -700,6 +711,26 @@
                         backgroundColor: 'rgba(231, 76, 60, 0.1)',
                         borderWidth: 2,
                         tension: 0.1
+                    }, {
+                        label: 'Host Break-Even',
+                        data: breakEvenPoints.hostBreakEven !== null ? [{x: breakEvenPoints.hostBreakEven, y: 0}, {x: breakEvenPoints.hostBreakEven, y: Math.max(...hostRevenueData, ...bandRevenueData)}] : [],
+                        borderColor: '#3498db',
+                        borderDash: [5, 5],
+                        borderWidth: 2,
+                        backgroundColor: 'transparent',
+                        pointRadius: 0,
+                        showLine: true,
+                        tension: 0
+                    }, {
+                        label: 'Band Break-Even',
+                        data: breakEvenPoints.bandBreakEven !== null && breakEvenPoints.bandBreakEven <= 250 ? [{x: breakEvenPoints.bandBreakEven, y: 0}, {x: breakEvenPoints.bandBreakEven, y: Math.max(...hostRevenueData, ...bandRevenueData)}] : [],
+                        borderColor: '#e74c3c',
+                        borderDash: [5, 5],
+                        borderWidth: 2,
+                        backgroundColor: 'transparent',
+                        pointRadius: 0,
+                        showLine: true,
+                        tension: 0
                     }]
                 },
                 options: {
