@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Revenue Split Calculator</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3"></script>
     <style>
         * {
             box-sizing: border-box;
@@ -446,6 +447,38 @@
             }).format(amount);
         }
 
+        // Calculate break-even points
+        function calculateBreakEvenPoints() {
+            const generalAdmission = parseFloat(inputs.generalAdmission.value) || 0;
+            const additionalRevenue = parseFloat(inputs.additionalRevenue.value) || 0;
+            const bandBreakEven = parseFloat(inputs.bandBreakEven.value) || 0;
+            
+            // For host break-even, we need to find when host revenue > 0
+            // This happens when total revenue > 0, so it's essentially when we have any sales
+            let hostBreakEvenAttendees = 0;
+            if (generalAdmission > 0) {
+                // Host gets revenue starting from the first ticket (in step 1)
+                hostBreakEvenAttendees = Math.max(0, Math.ceil(-additionalRevenue / generalAdmission));
+            }
+            
+            // For band break-even, we need to find when band revenue >= bandBreakEven
+            let bandBreakEvenAttendees = null;
+            
+            // Search for the attendance level where band reaches break-even
+            for (let attendees = 0; attendees <= 250; attendees++) {
+                const result = calculateRevenueForAttendees(attendees);
+                if (result.totalToBand >= bandBreakEven) {
+                    bandBreakEvenAttendees = attendees;
+                    break;
+                }
+            }
+            
+            return {
+                hostBreakEven: hostBreakEvenAttendees,
+                bandBreakEven: bandBreakEvenAttendees
+            };
+        }
+
         // Calculate revenue for a specific number of attendees
         function calculateRevenueForAttendees(attendees) {
             // Get current input values
@@ -513,6 +546,56 @@
                 // Update chart data
                 revenueChart.data.datasets[0].data = hostRevenueData;
                 revenueChart.data.datasets[1].data = bandRevenueData;
+                
+                // Update break-even annotations
+                const breakEvenPoints = calculateBreakEvenPoints();
+                const annotations = {};
+                
+                if (breakEvenPoints.hostBreakEven !== null && breakEvenPoints.hostBreakEven <= 250) {
+                    annotations.hostBreakEven = {
+                        type: 'line',
+                        xMin: breakEvenPoints.hostBreakEven,
+                        xMax: breakEvenPoints.hostBreakEven,
+                        borderColor: '#3498db',
+                        borderWidth: 2,
+                        borderDash: [5, 5],
+                        label: {
+                            display: true,
+                            content: `Host Break-Even: ${breakEvenPoints.hostBreakEven} attendees`,
+                            position: 'start',
+                            backgroundColor: 'rgba(52, 152, 219, 0.8)',
+                            color: 'white',
+                            font: {
+                                size: 12
+                            },
+                            padding: 4
+                        }
+                    };
+                }
+                
+                if (breakEvenPoints.bandBreakEven !== null && breakEvenPoints.bandBreakEven <= 250) {
+                    annotations.bandBreakEven = {
+                        type: 'line',
+                        xMin: breakEvenPoints.bandBreakEven,
+                        xMax: breakEvenPoints.bandBreakEven,
+                        borderColor: '#e74c3c',
+                        borderWidth: 2,
+                        borderDash: [5, 5],
+                        label: {
+                            display: true,
+                            content: `Band Break-Even: ${breakEvenPoints.bandBreakEven} attendees`,
+                            position: 'end',
+                            backgroundColor: 'rgba(231, 76, 60, 0.8)',
+                            color: 'white',
+                            font: {
+                                size: 12
+                            },
+                            padding: 4
+                        }
+                    };
+                }
+                
+                revenueChart.options.plugins.annotation.annotations = annotations;
                 revenueChart.update();
             }
         }
@@ -525,6 +608,11 @@
 
         // Chart variables
         let revenueChart = null;
+        
+        // Register annotation plugin when available
+        if (window['chartjs-plugin-annotation']) {
+            Chart.register(window['chartjs-plugin-annotation']);
+        }
 
         // Create the revenue sweep chart
         function createRevenueChart() {
@@ -542,6 +630,56 @@
                 const result = calculateRevenueForAttendees(attendees);
                 hostRevenueData.push(result.totalToHost);
                 bandRevenueData.push(result.totalToBand);
+            }
+            
+            // Calculate break-even points
+            const breakEvenPoints = calculateBreakEvenPoints();
+            
+            // Create annotations for break-even lines
+            const annotations = {};
+            
+            if (breakEvenPoints.hostBreakEven !== null && breakEvenPoints.hostBreakEven <= 250) {
+                annotations.hostBreakEven = {
+                    type: 'line',
+                    xMin: breakEvenPoints.hostBreakEven,
+                    xMax: breakEvenPoints.hostBreakEven,
+                    borderColor: '#3498db',
+                    borderWidth: 2,
+                    borderDash: [5, 5],
+                    label: {
+                        display: true,
+                        content: `Host Break-Even: ${breakEvenPoints.hostBreakEven} attendees`,
+                        position: 'start',
+                        backgroundColor: 'rgba(52, 152, 219, 0.8)',
+                        color: 'white',
+                        font: {
+                            size: 12
+                        },
+                        padding: 4
+                    }
+                };
+            }
+            
+            if (breakEvenPoints.bandBreakEven !== null && breakEvenPoints.bandBreakEven <= 250) {
+                annotations.bandBreakEven = {
+                    type: 'line',
+                    xMin: breakEvenPoints.bandBreakEven,
+                    xMax: breakEvenPoints.bandBreakEven,
+                    borderColor: '#e74c3c',
+                    borderWidth: 2,
+                    borderDash: [5, 5],
+                    label: {
+                        display: true,
+                        content: `Band Break-Even: ${breakEvenPoints.bandBreakEven} attendees`,
+                        position: 'end',
+                        backgroundColor: 'rgba(231, 76, 60, 0.8)',
+                        color: 'white',
+                        font: {
+                            size: 12
+                        },
+                        padding: 4
+                    }
+                };
             }
             
             revenueChart = new Chart(ctx, {
@@ -575,6 +713,9 @@
                         legend: {
                             display: true,
                             position: 'top'
+                        },
+                        annotation: {
+                            annotations: annotations
                         }
                     },
                     scales: {
