@@ -1255,8 +1255,16 @@
                 const chartArea = chart.chartArea;
                 const xScale = chart.scales.x;
                 
-                // Calculate x position using the chart's scale directly
-                const xPosition = xScale.getPixelForValue(currentAttendees);
+                // Calculate x position by finding the index in the labels array
+                // Since labels are [0, 5, 10, 15, ..., 250], we need to find the index
+                const labels = chart.data.labels;
+                const labelIndex = labels.indexOf(currentAttendees);
+                
+                // If the exact value isn't in labels, find the closest one
+                const actualIndex = labelIndex >= 0 ? labelIndex : Math.round(currentAttendees / 5);
+                
+                // Use the index to get the correct pixel position
+                const xPosition = xScale.getPixelForValue(actualIndex);
                 
                 if (xPosition >= chartArea.left && xPosition <= chartArea.right) {
                     ctx.save();
