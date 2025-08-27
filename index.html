@@ -1283,7 +1283,7 @@
             afterDraw: (chart) => {
                 if (!chart.scales || !chart.scales.x) return;
                 
-                const currentAttendees = parseInt(inputs.attendees.value) || 60;
+                const currentAttendees = inputs.attendees.value !== '' ? parseInt(inputs.attendees.value) : 60;
                 const ctx = chart.ctx;
                 const chartArea = chart.chartArea;
                 const xScale = chart.scales.x;
