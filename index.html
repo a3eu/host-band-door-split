@@ -1253,41 +1253,77 @@
                 const currentAttendees = parseInt(inputs.attendees.value) || 60;
                 const ctx = chart.ctx;
                 const chartArea = chart.chartArea;
-                const scales = chart.scales;
+                const xScale = chart.scales.x;
                 
-                // Calculate x position based on attendance value
-                const xPosition = scales.x.getPixelForValue(currentAttendees);
+                // Debug: log the scale info
+                console.log('Current attendees:', currentAttendees);
+                console.log('Scale min:', xScale.min, 'max:', xScale.max);
+                console.log('Chart labels:', chart.data.labels.slice(0, 10), '...');
+                
+                // Calculate x position - need to map the attendee value to the chart's data points
+                // The chart uses data points at intervals of 5 (0, 5, 10, 15, ..., 250)
+                // So we need to find the correct index in the labels array
+                const dataLabels = chart.data.labels;
+                let xPosition;
+                
+                if (dataLabels.includes(currentAttendees)) {
+                    // Exact match in labels
+                    xPosition = xScale.getPixelForValue(currentAttendees);
+                } else {
+                    // Find closest label for positioning
+                    const closestLabel = dataLabels.reduce((prev, curr) => 
+                        Math.abs(curr - currentAttendees) < Math.abs(prev - currentAttendees) ? curr : prev
+                    );
+                    xPosition = xScale.getPixelForValue(closestLabel);
+                    
+                    // Interpolate for more accurate positioning
+                    const labelIndex = dataLabels.indexOf(closestLabel);
+                    if (currentAttendees > closestLabel && labelIndex < dataLabels.length - 1) {
+                        const nextLabel = dataLabels[labelIndex + 1];
+                        const nextPosition = xScale.getPixelForValue(nextLabel);
+                        const ratio = (currentAttendees - closestLabel) / (nextLabel - closestLabel);
+                        xPosition = xPosition + ratio * (nextPosition - xPosition);
+                    } else if (currentAttendees < closestLabel && labelIndex > 0) {
+                        const prevLabel = dataLabels[labelIndex - 1];
+                        const prevPosition = xScale.getPixelForValue(prevLabel);
+                        const ratio = (currentAttendees - prevLabel) / (closestLabel - prevLabel);
+                        xPosition = prevPosition + ratio * (xPosition - prevPosition);
+                    }
+                }
+                
+                console.log('Calculated x position:', xPosition);
                 
                 if (xPosition >= chartArea.left && xPosition <= chartArea.right) {
                     ctx.save();
                     
-                    // Draw the vertical line
+                    // Draw the vertical line - changed to green
                     ctx.setLineDash([8, 4]);
-                    ctx.strokeStyle = '#ff4500';
+                    ctx.strokeStyle = '#22c55e'; // Green color
                     ctx.lineWidth = 4;
-                    ctx.globalAlpha = 0.8;
+                    ctx.globalAlpha = 0.9;
                     ctx.beginPath();
                     ctx.moveTo(xPosition, chartArea.top);
                     ctx.lineTo(xPosition, chartArea.bottom);
                     ctx.stroke();
                     
-                    // Add label background
+                    // Add label background - changed to green
                     ctx.setLineDash([]);
-                    ctx.fillStyle = '#ff4500';
+                    ctx.fillStyle = '#22c55e'; // Green color
                     ctx.globalAlpha = 1;
                     const labelText = `${currentAttendees}`;
+                    ctx.font = 'bold 12px Arial';
                     const textMetrics = ctx.measureText(labelText);
-                    const labelWidth = textMetrics.width + 8;
-                    const labelHeight = 20;
+                    const labelWidth = textMetrics.width + 12;
+                    const labelHeight = 24;
                     const labelX = xPosition - labelWidth / 2;
                     const labelY = chartArea.top - labelHeight - 5;
                     
-                    // Draw label background
+                    // Draw label background with rounded corners
+                    ctx.fillStyle = '#22c55e';
                     ctx.fillRect(labelX, labelY, labelWidth, labelHeight);
                     
                     // Draw label text
                     ctx.fillStyle = 'white';
-                    ctx.font = 'bold 12px Arial';
                     ctx.textAlign = 'center';
                     ctx.textBaseline = 'middle';
                     ctx.fillText(labelText, xPosition, labelY + labelHeight / 2);
