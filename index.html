@@ -1255,43 +1255,8 @@
                 const chartArea = chart.chartArea;
                 const xScale = chart.scales.x;
                 
-                // Debug: log the scale info
-                console.log('Current attendees:', currentAttendees);
-                console.log('Scale min:', xScale.min, 'max:', xScale.max);
-                console.log('Chart labels:', chart.data.labels.slice(0, 10), '...');
-                
-                // Calculate x position - need to map the attendee value to the chart's data points
-                // The chart uses data points at intervals of 5 (0, 5, 10, 15, ..., 250)
-                // So we need to find the correct index in the labels array
-                const dataLabels = chart.data.labels;
-                let xPosition;
-                
-                if (dataLabels.includes(currentAttendees)) {
-                    // Exact match in labels
-                    xPosition = xScale.getPixelForValue(currentAttendees);
-                } else {
-                    // Find closest label for positioning
-                    const closestLabel = dataLabels.reduce((prev, curr) => 
-                        Math.abs(curr - currentAttendees) < Math.abs(prev - currentAttendees) ? curr : prev
-                    );
-                    xPosition = xScale.getPixelForValue(closestLabel);
-                    
-                    // Interpolate for more accurate positioning
-                    const labelIndex = dataLabels.indexOf(closestLabel);
-                    if (currentAttendees > closestLabel && labelIndex < dataLabels.length - 1) {
-                        const nextLabel = dataLabels[labelIndex + 1];
-                        const nextPosition = xScale.getPixelForValue(nextLabel);
-                        const ratio = (currentAttendees - closestLabel) / (nextLabel - closestLabel);
-                        xPosition = xPosition + ratio * (nextPosition - xPosition);
-                    } else if (currentAttendees < closestLabel && labelIndex > 0) {
-                        const prevLabel = dataLabels[labelIndex - 1];
-                        const prevPosition = xScale.getPixelForValue(prevLabel);
-                        const ratio = (currentAttendees - prevLabel) / (closestLabel - prevLabel);
-                        xPosition = prevPosition + ratio * (xPosition - prevPosition);
-                    }
-                }
-                
-                console.log('Calculated x position:', xPosition);
+                // Calculate x position using the chart's scale directly
+                const xPosition = xScale.getPixelForValue(currentAttendees);
                 
                 if (xPosition >= chartArea.left && xPosition <= chartArea.right) {
                     ctx.save();
