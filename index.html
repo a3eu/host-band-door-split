@@ -225,7 +225,7 @@
         }
 
         .attendees-section {
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             border-radius: 8px;
             padding: 25px;
             margin-bottom: 30px;
@@ -1388,28 +1388,6 @@
                     ctx.moveTo(xPosition, chartArea.top);
                     ctx.lineTo(xPosition, chartArea.bottom);
                     ctx.stroke();
-                    
-                    // Add label background - changed to green
-                    ctx.setLineDash([]);
-                    ctx.fillStyle = '#22c55e'; // Green color
-                    ctx.globalAlpha = 1;
-                    const labelText = `${currentAttendees}`;
-                    ctx.font = 'bold 12px Arial';
-                    const textMetrics = ctx.measureText(labelText);
-                    const labelWidth = textMetrics.width + 12;
-                    const labelHeight = 24;
-                    const labelX = xPosition - labelWidth / 2;
-                    const labelY = chartArea.top - labelHeight - 5;
-                    
-                    // Draw label background with rounded corners
-                    ctx.fillStyle = '#22c55e';
-                    ctx.fillRect(labelX, labelY, labelWidth, labelHeight);
-                    
-                    // Draw label text
-                    ctx.fillStyle = 'white';
-                    ctx.textAlign = 'center';
-                    ctx.textBaseline = 'middle';
-                    ctx.fillText(labelText, xPosition, labelY + labelHeight / 2);
                     
                     ctx.restore();
                 }
