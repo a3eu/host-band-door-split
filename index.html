@@ -1341,6 +1341,7 @@
 
         // Modified calculate function to also update chart
         function calculateAndUpdateChart() {
+            updateSliderDisplays(); // Ensure display values are synced first
             calculate();
             updateChart();
         }
