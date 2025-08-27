@@ -933,7 +933,7 @@
             <div class="results-container">
                 <div class="param-row">
                     <label for="attendees">Number of Attendees: <span id="attendeesValue">60</span></label>
-                    <input type="range" id="attendees" class="slider" value="60" min="0" max="500" step="5">
+                    <input type="range" id="attendees" class="slider" value="60" min="0" max="250" step="5">
                 </div>
                 <div class="result-row">
                     <span class="result-label">Total Revenue</span>
@@ -1222,7 +1222,7 @@
                 const hostRevenueData = [];
                 const bandRevenueData = [];
                 
-                for (let attendees = 0; attendees <= 200; attendees += 5) {
+                for (let attendees = 0; attendees <= 250; attendees += 5) {
                     const result = calculateRevenueForAttendees(attendees);
                     hostRevenueData.push(result.totalToHost);
                     bandRevenueData.push(result.totalToBand);
@@ -1238,9 +1238,64 @@
                 revenueChart.data.datasets[2].data = Array(hostRevenueData.length).fill(hostBreakEven);
                 revenueChart.data.datasets[3].data = Array(bandRevenueData.length).fill(bandBreakEven);
                 
+                // The vertical line will be redrawn automatically by the plugin
+                
                 revenueChart.update();
             }
         }
+        
+        // Custom plugin to draw vertical line
+        const verticalLinePlugin = {
+            id: 'verticalLine',
+            afterDraw: (chart) => {
+                if (!chart.scales || !chart.scales.x) return;
+                
+                const currentAttendees = parseInt(inputs.attendees.value) || 60;
+                const ctx = chart.ctx;
+                const chartArea = chart.chartArea;
+                const scales = chart.scales;
+                
+                // Calculate x position based on attendance value
+                const xPosition = scales.x.getPixelForValue(currentAttendees);
+                
+                if (xPosition >= chartArea.left && xPosition <= chartArea.right) {
+                    ctx.save();
+                    
+                    // Draw the vertical line
+                    ctx.setLineDash([8, 4]);
+                    ctx.strokeStyle = '#ff4500';
+                    ctx.lineWidth = 4;
+                    ctx.globalAlpha = 0.8;
+                    ctx.beginPath();
+                    ctx.moveTo(xPosition, chartArea.top);
+                    ctx.lineTo(xPosition, chartArea.bottom);
+                    ctx.stroke();
+                    
+                    // Add label background
+                    ctx.setLineDash([]);
+                    ctx.fillStyle = '#ff4500';
+                    ctx.globalAlpha = 1;
+                    const labelText = `${currentAttendees}`;
+                    const textMetrics = ctx.measureText(labelText);
+                    const labelWidth = textMetrics.width + 8;
+                    const labelHeight = 20;
+                    const labelX = xPosition - labelWidth / 2;
+                    const labelY = chartArea.top - labelHeight - 5;
+                    
+                    // Draw label background
+                    ctx.fillRect(labelX, labelY, labelWidth, labelHeight);
+                    
+                    // Draw label text
+                    ctx.fillStyle = 'white';
+                    ctx.font = 'bold 12px Arial';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText(labelText, xPosition, labelY + labelHeight / 2);
+                    
+                    ctx.restore();
+                }
+            }
+        };
 
         // Modified calculate function to also update chart
         function calculateAndUpdateChart() {
@@ -1251,16 +1306,21 @@
         // Chart variables
         let revenueChart = null;
 
+        // Register the custom plugin before creating the chart
+        if (!Chart.getChart || !Chart.registry.plugins.get('verticalLine')) {
+            Chart.register(verticalLinePlugin);
+        }
+        
         // Create the revenue sweep chart
         function createRevenueChart() {
             const ctx = document.getElementById('revenueChart').getContext('2d');
             
-            // Generate data points for 0 to 200 attendees in increments of 5 (for chart display)
+            // Generate data points for 0 to 250 attendees in increments of 5 (for chart display)
             const attendeeRange = [];
             const hostRevenueData = [];
             const bandRevenueData = [];
             
-            for (let attendees = 0; attendees <= 200; attendees += 5) {
+            for (let attendees = 0; attendees <= 250; attendees += 5) {
                 attendeeRange.push(attendees);
                 
                 // Calculate revenue for this attendance level
