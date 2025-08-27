@@ -1039,6 +1039,27 @@
             input.addEventListener('input', calculateAndUpdateChart);
         });
         
+        // Function to update slider display values
+        function updateSliderDisplays() {
+            // Update Step 1 percentages
+            const step1Value = inputs.step1Host.value;
+            document.getElementById('step1HostValue').textContent = step1Value;
+            document.getElementById('step1BandValue').textContent = 100 - step1Value;
+            
+            // Update Step 2 percentages
+            const step2Value = inputs.step2Host.value;
+            document.getElementById('step2HostValue').textContent = step2Value;
+            document.getElementById('step2BandValue').textContent = 100 - step2Value;
+            
+            // Update Step 3 percentages
+            const step3Value = inputs.step3Host.value;
+            document.getElementById('step3HostValue').textContent = step3Value;
+            document.getElementById('step3BandValue').textContent = 100 - step3Value;
+            
+            // Update attendees count
+            document.getElementById('attendeesValue').textContent = inputs.attendees.value;
+        }
+        
         // Add event listeners for slider value display updates
         inputs.step1Host.addEventListener('input', function() {
             document.getElementById('step1HostValue').textContent = this.value;
@@ -1426,6 +1447,9 @@
             });
         }
 
+        // Initialize display values to match slider values
+        updateSliderDisplays();
+        
         // Calculate and create chart on page load
         calculate();
         createRevenueChart();
